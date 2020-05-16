@@ -8,19 +8,25 @@ module.exports = {
       const query = knex('projects')
         .limit(5)
         .offset((page - 1) * 5);
+
       const countObject = knex('projects').count();
 
       if (user_id) {
         query
           .where({ user_id })
           .join('users', 'users.id', '=', 'projects.id')
-          .select('projects.*', 'users.username');
+          .select('projects.*', 'users.username')
+          .where('users.deleted_at', null);
 
         countObject.where({ user_id });
+      } else {
+        query
+          .join('users', 'users.id', '=', 'projects.id')
+          .where('users.deleted_at', null);
       }
 
       const [count] = await countObject;
-      console.log(others);
+      //console.log(others);
 
       res.header('Total', count.count);
       const projets = await query;
